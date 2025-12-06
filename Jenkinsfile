@@ -2,26 +2,35 @@ pipeline {
   agent any
 
   tools {
-    maven 'Maven 3.9' // Specify the Maven installation name configured in Jenkins
+      maven 'Maven 3.9' // Specify the Maven installation name configured in Jenkins
+  }
+
+  environment {
+      TELEGRAM_TOKEN = credentials('telegram-token')
+      TELEGRAM_CHAT_ID = credentials('telegram-chat-id')
   }
 
   stages {
-    stage('Build') {
-      steps {
-        dir('complete') {
-          sh 'mvn clean install'
-        }
+      stage('Build') {
+          steps {
+              dir('complete') {
+                  sh 'mvn clean install'
+              }
+          }
       }
-    }
   }
 
   post {
-    success {
-      archiveArtifacts artifacts: 'complete/target/*.jar'
-      telegramSend(message: "✅ Build #${BUILD_NUMBER} SUCCESS\nJob: ${JOB_NAME}\nDuration: ${currentBuild.durationString}", chatId: 396976151)
-    }
-    failure {
-      telegramSend(message: "❌ Build #${BUILD_NUMBER} FAILED\nJob: ${JOB_NAME}", chatId: 396976151)
-    }
+      success {
+          archiveArtifacts artifacts: 'complete/target/*.jar'
+          sh '''
+              curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="✅ Build #${BUILD_NUMBER} SUCCESS - ${JOB_NAME}"
+          '''
+      }
+      failure {
+          sh '''
+              curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="❌ Build #${BUILD_NUMBER} FAILED - ${JOB_NAME}"
+          '''
+      }
   }
 }

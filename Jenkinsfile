@@ -18,10 +18,10 @@ pipeline {
   post {
     success {
       archiveArtifacts artifacts: 'complete/target/*.jar'
-      telegramSend(message: "✅ Build #${BUILD_NUMBER} SUCCESS\nJob: ${JOB_NAME}\nDuration: ${currentBuild.durationString}", chatId: "396976151")
+      telegramSend(message: "✅ Build #${BUILD_NUMBER} SUCCESS\nJob: ${JOB_NAME}\nDuration: ${currentBuild.durationString}", chatId: 396976151)
     }
     failure {
-      telegramSend(message: "❌ Build #${BUILD_NUMBER} FAILED\nJob: ${JOB_NAME}", chatId: "396976151")
+      telegramSend(message: "❌ Build #${BUILD_NUMBER} FAILED\nJob: ${JOB_NAME}", chatId: 396976151)
     }
   }
 }
